@@ -1,6 +1,6 @@
 # Mimic
 
-> **Status: pre-alpha, in early development.** Nothing here is stable. Interfaces, file layouts, and the choice of desktop framework are all expected to change.
+> **Status: pre-alpha, in early development.** Nothing here is stable. Interfaces and file layouts are still expected to change.
 
 Mimic is a desktop application that learns to type and write like its user, then drives real keystrokes into other applications (Outlook, browsers, Word, etc.) so that generated text arrives in the user's own voice and at the user's own typing rhythm.
 
@@ -33,7 +33,7 @@ A working browser-based prototype of the cadence-only training UI exists separat
 
 ## Repository layout
 
-```
+```text
 index.html             Renderer HTML entrypoint (Vite resolves /src/renderer.ts at build time)
 src/
   main.ts              Electron main process (window lifecycle, eventual native bridge)

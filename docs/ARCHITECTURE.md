@@ -28,12 +28,12 @@ Both frameworks can drive real keystrokes into arbitrary focused windows on Wind
 
 | Library | Status | Windows support | Notes |
 |---|---|---|---|
-| **`robotjs`** | **Effectively unmaintained.** Last release on npm is years old; long-running issues around Node ABI compatibility and prebuilt binaries. | Works historically, but breaks on newer Node/Electron versions without manual rebuilds. | Avoid for a new project. |
-| **`@nut-tree/nut-js`** (original) | Repo went **commercial / paid license** in 2023–2024. The free package on npm is no longer the primary source of truth. | Was the best option pre-license-change. | Not viable as the primary library now unless you pay. |
-| **`@nut-tree-fork/nut-js`** | **Active community fork** of the last permissively-licensed nut-js. Currently the de facto successor for new Electron projects that want the nut-js API. | Windows-first; uses `SendInput` under the hood (the same WinAPI Tauri's Rust crates wrap). Supports key down/up, modifiers, typing strings, mouse if needed later. | Recommended option if Electron is chosen. Risk: it's a community fork, so its longevity isn't guaranteed. |
-| **Native Node addon (custom)** | Always an option — call `SendInput` directly via N-API. | Full control. | Significant up-front work for what nut-js-fork already gives us. Only worth it if the fork dies. |
+| **`robotjs`** | **Actively maintained** (correction from earlier draft). Upstream `octalmage/robotjs` shipped v0.7.0 on 2026-03-11 with recent commits as of April 2026. Active community forks (`hurdlegroup/robotjs`, `jitsi/robotjs`) also maintained. | Long-standing pain points around prebuilt binaries and Node ABI compatibility on bleeding-edge Node/Electron versions; usually a rebuild + version pin away from working, but worth budgeting an afternoon for first-time setup on a new Electron major. | Viable. Lower-level/older API than nut-js (no async, less ergonomic for typing strings with modifiers), but it works. Worth a compatibility spike against the chosen Electron version before committing. |
+| **`@nut-tree/nut-js`** (original) | Public npm packages were **removed** during 2024 (last GitHub release v4.2.0, 2024-04-10); upstream now requires building from source. Licensing details around commercial vs source-available are not fully verified — confirm before relying on this package. | Was the best option historically. | Not viable as a drop-in npm dependency for a new project. |
+| **`@nut-tree-fork/nut-js`** | **Active community fork** (`@nut-tree-fork/nut-js` v4.2.6, 2025-03-13, ~25K weekly downloads as of April 2026). Maintained by dry Software UG. | Windows-first; uses `SendInput` under the hood (the same WinAPI Tauri's Rust crates wrap). Supports key down/up, modifiers, typing strings, mouse if needed later. Async API, ergonomic for the cadence-playback use case. | Recommended primary if Electron is chosen. Risk: it's a community fork, so its longevity isn't guaranteed — but the fork has been steadily releasing for over a year. |
+| **Native Node addon (custom)** | Always an option — call `SendInput` directly via N-API. | Full control. | Significant up-front work for what either `nut-js-fork` or `robotjs` already gives us. Only worth it if both higher-level options stagnate. |
 
-**Bottom line for Electron:** `@nut-tree-fork/nut-js` is a credible primary, with a custom N-API addon as the fallback escape hatch if the fork stagnates. The risk profile is "this fork is the lifeline; if it dies we write our own thin wrapper around `SendInput`." Manageable.
+**Bottom line for Electron:** `@nut-tree-fork/nut-js` is a credible primary because of its async API and active release cadence; **`robotjs` is a viable secondary** rather than the dead-end the earlier draft of this document claimed (CodeRabbit caught this — the upstream is in fact actively maintained as of April 2026, the issue is API ergonomics, not abandonment). A custom `SendInput` N-API addon remains the deepest fallback. The risk profile is "two independently maintained higher-level options plus a clear escape hatch." Manageable.
 
 ### Tauri — Rust crates
 
@@ -138,7 +138,7 @@ For v1 (Windows-only), frontend-reuse is a wash.
 |---|---|---|
 | Mechanism | `electron-updater` (Squirrel.Windows / NSIS / generic) | Built-in updater via signed manifest URL |
 | Maturity | Battle-tested across thousands of shipping apps | Newer, works, less folklore |
-| Delta updates | Available via Squirrel (more setup) | Tauri delta updates are a roadmap item; usually full-installer replacement today |
+| Delta updates | Available via Squirrel (more setup) | Full-installer replacement is the norm; production-ready delta updates are still a roadmap item as of Tauri v2.x (April 2026) |
 | Update server | GitHub Releases works as a free backend for both | Same |
 
 For Mimic shipping to a few colleagues, either updater is sufficient. GitHub Releases is fine as the update host for both.
@@ -171,13 +171,20 @@ Edge to Electron, but not a deal-breaker for Tauri.
 Reasoning, in priority order:
 
 1. **Language stack matches the developer.** TS-only end-to-end keeps the cognitive load on the actual interesting problems (cadence capture/playback, paired-style cartridge, Claude API rewrite) instead of on Rust ergonomics. Rust would be a worthwhile thing to learn — but not on the critical path of this project.
-2. **Keystroke injection is solved enough.** `@nut-tree-fork/nut-js` is good enough for v1, with a custom `SendInput` N-API addon as a documented escape hatch if the fork stagnates. Tauri's `enigo` is genuinely better-maintained, but not better-maintained *enough* to justify learning Rust for it.
+2. **Keystroke injection is solved enough.** `@nut-tree-fork/nut-js` is good enough for v1, with `robotjs` as an independently maintained second option and a custom `SendInput` N-API addon as the deepest fallback. Tauri's `enigo` is in good shape too, but not better-maintained *enough* — given Electron now has two viable JS-side libraries, not one — to justify learning Rust for it.
 3. **Frontend reuse is a wash.** The existing HTML/CSS/JS prototype ports cleanly to either.
 4. **Bundle size is real but not decisive at this scale.** ~150 MB vs ~10 MB matters when you're shipping to hundreds of users; for a handful of colleagues over the next few months, it's fine.
 5. **Tooling maturity for signing/auto-updates favours Electron.** Not by a huge margin, but the marginal hours saved compound for a solo dev.
 6. **The Tauri exit ramp is open.** If Mimic ever needs to ship to a much larger audience and bundle size starts mattering, the renderer (TS / HTML / CSS) ports forward; only the main-process / native-bridge layer would need rewriting in Rust. This is a real, non-trivial rewrite, but it's a future problem to solve from a position of "Mimic v1 actually exists".
 
 **The trade we are explicitly making:** accepting a ~15× bundle-size penalty and a slightly lower keystroke-library maintenance ceiling, in exchange for staying in one language end-to-end and shipping faster.
+
+### Verify before committing actual money
+
+Before paying for anything based on this doc:
+
+- **Code-signing certificate prices** (§5) are rough industry-typical ranges, not direct quotes from DigiCert / Sectigo / SSL.com as of April 2026. Get a current quote before committing.
+- **Original `@nut-tree/nut-js` licensing** (§1) — the public npm package was removed during 2024 but the precise commercial terms vs source-available status weren't fully verified for this doc. If we ever consider going back to the upstream, confirm the licence first.
 
 ### Concrete next steps once this is signed off
 

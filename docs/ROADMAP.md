@@ -2,10 +2,10 @@
 
 Rough phases. Order is intentional; each phase unblocks the next. Dates are deliberately omitted — this is a personal project and timing will flex.
 
-## Phase 0 — Repo bootstrap *(in progress)*
+## Phase 0 — Repo bootstrap _(in progress)_
 
 - Repo, README, license, gitignore. ✅ (bootstrap commits on `main`)
-- Scaffolding PR: docs stubs, PR template, CI skeleton. *(this branch)*
+- Scaffolding PR: docs stubs, PR template, CI skeleton. _(this branch)_
 - CodeRabbit AI review wired up.
 
 ## Phase 1 — Architecture decision

@@ -71,7 +71,7 @@ Numbers are approximate and reflect "hello world" baselines for a Windows instal
 For Mimic specifically:
 
 - **Distribution to colleagues** — sharing a 150 MB Electron installer over Slack or a shared drive is fine. Sharing a 5 MB Tauri installer is nicer but not transformative at this scale (handful of users, internal). The bundle-size gap matters more if Mimic ever gets distributed to dozens or hundreds of users.
-- **Auto-update payloads** — Tauri's smaller *full-installer* payloads compound nicely if we ship often, since both frameworks today default to full-installer replacement on Windows. (Production-ready delta/patch updates are still a roadmap item in Tauri v2.x as of April 2026; electron-updater can do delta updates via Squirrel but it's extra setup. See §5.)
+- **Auto-update payloads** — Tauri's smaller *full-installer* payloads compound nicely if we often ship, since both frameworks today default to full-installer replacement on Windows. (Production-ready delta/patch updates are still a roadmap item in Tauri v2.x as of April 2026; electron-updater can do delta updates via Squirrel but it's extra setup. See §5.)
 - **Disk footprint on the target machine** — only relevant if a colleague is tight on disk; not a 2026-laptop concern.
 
 **Net:** Tauri wins on size by ~15×. The win is real but only meaningful at distribution scale Mimic isn't operating at yet.
@@ -93,7 +93,7 @@ This is the most consequential comparison for a solo developer.
 
 The honest assessment for Mimic:
 
-- **Rust is not a small detour.** "Comfortable in TS, not in Rust" means every native-bridge bug, every borrow-checker fight, every Cargo build issue costs disproportionate time on a side project where the *interesting* work is the cadence model and the Claude API style pipeline. Two new things at once (Rust + ML-ish cadence playback) is a recipe for the project stalling.
+- **Rust is not a small detour.** "Comfortable in TS, not in Rust" means every native-bridge bug, every borrow-checker fight, every Cargo build issue costs disproportionate time on a side project where the *interesting* work is the cadence model and the style-cartridge / Claude-API rewrite pipeline. Two new things at once (Rust + ML-ish cadence playback) is a recipe for the project stalling.
 - **Learning Rust is a fine goal in isolation** but it's a learning goal, not a Mimic goal. If Mimic is the vehicle for learning Rust, accept that Mimic will ship slower. If Mimic is meant to actually ship, the Rust tax buys very little here that we can't get from Electron.
 - **The "Rust everywhere" pitch (better safety, better perf)** is real but largely irrelevant for Mimic's workload. There's no hot path in Mimic that's bottlenecked on language-level performance — keystroke injection is a few `SendInput` calls per second at most, not millions.
 
@@ -158,7 +158,7 @@ This applies **identically to both frameworks** and is worth flagging clearly be
 
 | | **Electron** | **Tauri** |
 |---|---|---|
-| Pipeline | electron-builder / electron-forge — mature, lots of examples for Windows OV/EV signing, Azure Key Vault integration, etc. | tauri-bundler — works, but less folklore. EV-on-hardware-token signing is documented but rougher. |
+| Pipeline | electron-builder / electron-forge — mature, many examples for Windows OV/EV signing, Azure Key Vault integration, etc. | tauri-bundler — works, but less folklore. EV-on-hardware-token signing is documented but rougher. |
 
 Edge to Electron, but not a deal-breaker for Tauri.
 

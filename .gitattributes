@@ -1,0 +1,15 @@
+# Force LF line endings across platforms so Prettier's `endOfLine: "lf"` rule
+# stays consistent with what's checked out on disk on Windows machines too.
+* text=auto eol=lf
+
+# Windows-only script formats keep their native line endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Lock files and binary-ish artefacts.
+package-lock.json text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

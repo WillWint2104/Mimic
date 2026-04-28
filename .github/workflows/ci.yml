@@ -1,0 +1,37 @@
+name: CI
+
+# Skeleton workflow. Real lint / type-check / test jobs land alongside the
+# architecture-decision PR (Electron vs Tauri), once we know the stack.
+# Until then this exists so:
+#   - branch protection rules can require a "ci" status check from PR 1
+#   - we have a single place to add real jobs without changing the workflow
+#     entry point later
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel in-progress runs on the same ref when a new commit lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI (skeleton)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Placeholder
+        run: |
+          echo "CI skeleton — no real checks yet."
+          echo "Real lint / type-check / test jobs will be added with the"
+          echo "architecture-decision PR once the stack (Electron vs Tauri)"
+          echo "is chosen. See docs/TODO.md."

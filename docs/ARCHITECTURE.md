@@ -71,7 +71,7 @@ Numbers are approximate and reflect "hello world" baselines for a Windows instal
 For Mimic specifically:
 
 - **Distribution to colleagues** — sharing a 150 MB Electron installer over Slack or a shared drive is fine. Sharing a 5 MB Tauri installer is nicer but not transformative at this scale (handful of users, internal). The bundle-size gap matters more if Mimic ever gets distributed to dozens or hundreds of users.
-- **Auto-update payloads** — Tauri's smaller delta updates compound nicely if we ship often. With Electron, full installer downloads are the norm (electron-updater can do delta updates via Squirrel but it's more setup).
+- **Auto-update payloads** — Tauri's smaller *full-installer* payloads compound nicely if we ship often, since both frameworks today default to full-installer replacement on Windows. (Production-ready delta/patch updates are still a roadmap item in Tauri v2.x as of April 2026; electron-updater can do delta updates via Squirrel but it's extra setup. See §5.)
 - **Disk footprint on the target machine** — only relevant if a colleague is tight on disk; not a 2026-laptop concern.
 
 **Net:** Tauri wins on size by ~15×. The win is real but only meaningful at distribution scale Mimic isn't operating at yet.

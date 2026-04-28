@@ -34,11 +34,12 @@ A working browser-based prototype of the cadence-only training UI exists separat
 ## Repository layout
 
 ```
+index.html             Renderer HTML entrypoint (Vite resolves /src/renderer.ts at build time)
 src/
   main.ts              Electron main process (window lifecycle, eventual native bridge)
   preload.ts           Privileged bridge between main and renderer (currently empty)
   renderer.ts          Renderer entrypoint
-  index.html           Renderer HTML
+  index.css            Renderer styles
   shared/              Code shared between main and renderer (types, constants)
 docs/                  Architecture notes, roadmap, TODOs
 .github/               PR template and CI workflow
@@ -67,6 +68,22 @@ npm run typecheck
 ```
 
 A pre-commit hook (husky + lint-staged) runs ESLint and Prettier on staged files. CI runs the same checks plus an `electron-forge package` smoke build on every PR.
+
+### Manual verification before pushing
+
+Lint, typecheck, and `format:check` together prove the code compiles and conforms — they do **not** prove the app actually runs. Before pushing any change that touches `src/main.ts`, `src/preload.ts`, `src/renderer.ts`, `index.html`, `src/index.css`, `forge.config.ts`, or any of the `vite.*.config.ts` files:
+
+```bash
+npm start
+```
+
+Then eyeball the window:
+
+- The "Mimic" splash text and the version line are visible (not a blank `<body>`).
+- DevTools console (Ctrl+Shift+I / Cmd+Option+I) shows no errors and no Content-Security-Policy warnings.
+- Closing the window quits the process cleanly.
+
+Skipping this check is how you ship a blank window with passing CI — PR #3's first push did exactly that. CI will not catch a blank renderer; the smoke `package` build only proves the build pipeline succeeds, not that the app _displays_ anything.
 
 All changes go through pull requests on feature branches off `main`. See the PR template for the expected description format.
 

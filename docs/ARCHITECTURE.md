@@ -148,11 +148,15 @@ For Mimic shipping to a few colleagues, either updater is sufficient. GitHub Rel
 This applies **identically to both frameworks** and is worth flagging clearly because it's not free:
 
 - **Without code signing**, any installer downloaded by a colleague triggers SmartScreen "unrecognized app" warnings. They can dismiss them, but it's friction every time.
-- **OV (Organization Validation) cert** — typically **~$200–400/year** from Sectigo / DigiCert / SSL.com. Builds SmartScreen reputation gradually as users install signed releases.
-- **EV (Extended Validation) cert** — typically **~$400–700/year**, often shipped on a hardware token. Gets immediate SmartScreen reputation (no "unrecognized app" warning from day one).
-- Both certs require a verifiable organization or sole-trader registration, which adds onboarding friction beyond just paying.
+- **OV (Organization Validation) cert** — typically **~$200–400/year** from Sectigo / DigiCert / SSL.com. SmartScreen reputation builds gradually with usage/downloads.
+- **EV (Extended Validation) cert** — typically **~$400–700/year**, often shipped on a hardware token. Historically granted *instant* SmartScreen reputation; **as of March 2024 Microsoft removed that benefit** — EV reputation now also builds via usage/downloads, same as OV. EV is still worth it if a hardware-token-backed key is required by other policies, but the SmartScreen-specific argument for paying the EV premium is much weaker than older write-ups suggest.
+- **Term and key-storage rules** — post-2026 CA/B Forum rules cap signing-cert terms at ~1 year and require keys on FIPS-compliant hardware (HSM or token), so add ~$50–150 for the token plus any cloud-HSM fees.
+- **Cloud signing alternative** — Microsoft Azure Trusted Signing (~$10/month basic, ~$100/month premium) avoids the cert + token logistics and is worth a look once we cross into "actually paying for signing".
+- Both OV and EV require a verifiable organization or sole-trader registration, which adds onboarding friction beyond just paying.
 
 **Recommendation regardless of framework:** for the first few colleague-only releases, ship unsigned and accept the SmartScreen warning. Defer the signing cost until Mimic has a stable v1 worth distributing more widely. Document the SmartScreen workaround in the install instructions.
+
+> **Caveat for managed/enterprise machines.** SmartScreen "warn but allow" behaviour assumes the colleague's Windows is in its default state. Managed machines (Pro/Enterprise SKUs running AppLocker or Windows Defender Application Control / WDAC, common in corporate IT) may *block* unsigned executables outright, independent of SmartScreen — there's no "click through" path. If any of the early colleague testers run their laptops under corporate-managed images, signing may move from "nice eventually" to "required before they can run Mimic at all". Worth a quick "is your laptop managed by IT?" check before assuming the unsigned path will work for them.
 
 ### Tooling for signing
 
